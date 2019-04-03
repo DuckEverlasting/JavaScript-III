@@ -20,9 +20,11 @@ function GameObject(data) {
   this.createdAt = data.createdAt;
   this.name = data.name;
   this.dimensions = data.dimensions;
+  this.exists = true;
 };
 
 GameObject.prototype.destroy = function() {
+  this.exists = false;
   return `${this.name} was removed from the game.`
 };
 
@@ -39,8 +41,20 @@ function CharacterStats(data) {
   this.healthPoints = data.healthPoints;
 };
 
+
 CharacterStats.prototype = Object.create(GameObject.prototype);
-CharacterStats.prototype.takeDamage = function() {return `${this.name} took damage.`};
+CharacterStats.prototype.takeDamage = function(dam) {
+  this.healthPoints -= dam;
+  if (this.healthPoints <= 0) {
+    this.healthPoints = 0;
+    return `${this.name} took ${dam} damage.\n${this.destroy()}`
+  } else {
+    return `${this.name} took ${dam} damage.`
+  };
+};
+CharacterStats.prototype.displayHealth = function() {
+  return `${this.name} currently has ${this.healthPoints} hp remaining.`
+};
 
 
 /*
@@ -58,6 +72,7 @@ function Humanoid(data) {
   this.team = data.team;
   this.weapons = data.weapons;
   this.weaponDamage = data.weaponDamage;
+  this.accuracy = data.accuracy ? data.accuracy : 0.5;
   this.strength = data.strength;
   this.language = data.language;
 };
@@ -79,8 +94,18 @@ function Hero(data) {
 };
 
 Hero.prototype = Object.create(Humanoid.prototype);
-Hero.prototype.vBasicAtk = function() {
-  return `${this.name} strikes valiantly with ${this.weapons[0]}`
+Hero.prototype.heroBasicAtk = function(target) {
+  if (target.exists){
+    if (this.exists) {
+      let dam = (this.strength / 10) * this.weapons[0].weaponDamage;
+      let hit = this.accuracy >= Math.random();
+      return (hit) ? `${this.name} attacks ${target.name} valiantly with ${this.weapons[0].weaponName}! ${target.takeDamage(dam)}` : `${this.name} attacks ${target.name} valiantly with ${this.weapons[0].weaponName}! And misses!`;
+    } else {
+      return `${this.name} is dead!`
+    };
+  } else {
+    return `${target.name} has been vanquished by ${this.name}!`
+  };
 };
 
 function Villain(data) {
@@ -89,72 +114,180 @@ function Villain(data) {
 };
 
 Villain.prototype = Object.create(Humanoid.prototype);
-Villain.prototype.vBasicAtk
+Villain.prototype.villainBasicAtk = function(target) {
+  if (target.exists){
+    if (this.exists) {
+      let dam = (this.strength / 10) * this.weapons[0].weaponDamage;
+      let hit = this.accuracy >= Math.random();
+      return (hit) ? `${this.name} attacks ${target.name} maliciously with ${this.weapons[0].weaponName}! ${target.takeDamage(dam)}` : `${this.name} attacks ${target.name} maliciously with ${this.weapons[0].weaponName}! And misses!`;
+    } else {
+      return `${this.name} is dead!`
+    };
+  } else {
+    return `${target.name} has been vanquished by ${this.name}!`
+  };
+};
 
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
 
-  const mage = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 2,
-      width: 1,
-      height: 1,
-    },
-    healthPoints: 5,
-    name: 'Bruce',
-    team: 'Mage Guild',
-    weapons: [
-      'Staff of Shamalama',
-    ],
-    language: 'Common Tongue',
-  });
+const mage = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 2,
+    width: 1,
+    height: 1,
+  },
+  healthPoints: 5,
+  name: 'Bruce',
+  team: 'Mage Guild',
+  weapons: [
+    'Staff of Shamalama',
+  ],
+  language: 'Common Tongue',
+});
 
-  const swordsman = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 2,
-      width: 2,
-      height: 2,
-    },
-    healthPoints: 15,
-    name: 'Sir Mustachio',
-    team: 'The Round Table',
-    weapons: [
-      'Giant Sword',
-      'Shield',
-    ],
-    language: 'Common Tongue',
-  });
+const swordsman = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 2,
+    width: 2,
+    height: 2,
+  },
+  healthPoints: 15,
+  name: 'Sir Mustachio',
+  team: 'The Round Table',
+  weapons: [
+    'Giant Sword',
+    'Shield',
+  ],
+  language: 'Common Tongue',
+});
 
-  const archer = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 1,
-      width: 2,
-      height: 4,
-    },
-    healthPoints: 10,
-    name: 'Lilith',
-    team: 'Forest Kingdom',
-    weapons: [
-      'Bow',
-      'Dagger',
-    ],
-    language: 'Elvish',
-  });
+const archer = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4,
+  },
+  healthPoints: 10,
+  name: 'Lilith',
+  team: 'Forest Kingdom',
+  weapons: [
+    'Bow',
+    'Dagger',
+  ],
+  language: 'Elvish',
+});
 
-  console.log(mage.createdAt); // Today's date
-  console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
-  console.log(swordsman.healthPoints); // 15
-  console.log(mage.name); // Bruce
-  console.log(swordsman.team); // The Round Table
-  console.log(mage.weapons); // Staff of Shamalama
-  console.log(archer.language); // Elvish
-  console.log(archer.greet()); // Lilith offers a greeting in Elvish.
-  console.log(mage.takeDamage()); // Bruce took damage.
-  console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
+const beefman = new Hero({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4,
+  },
+  healthPoints: 20,
+  name: 'Beefman',
+  team: 'Good Guys',
+  weapons: [
+    {"weaponName":"Sword",
+    "weaponDamage":2},
+    {"weaponName":"Dagger",
+    "weaponDamage":1}
+  ],
+  strength: 18,
+  accuracy: .75,
+  language: 'Common',
+});
+
+const evilDan = new Villain({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4,
+  },
+  healthPoints: 20,
+  name: 'Evil Dan',
+  team: 'Bad Guys',
+  weapons: [
+    {"weaponName":"Knife",
+    "weaponDamage":1},
+    {"weaponName":"Other Knife",
+    "weaponDamage":1}
+  ],
+  strength: 16,
+  accuracy: .70,
+  language: 'Common',
+});
+
+  
+  // console.log(mage.createdAt); // Today's date
+  // console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
+  // console.log(swordsman.healthPoints); // 15
+  // console.log(mage.name); // Bruce
+  // console.log(swordsman.team); // The Round Table
+  // console.log(mage.weapons); // Staff of Shamalama
+  // console.log(archer.language); // Elvish
+  // console.log(archer.greet()); // Lilith offers a greeting in Elvish.
+  // console.log(mage.takeDamage()); // Bruce took damage.
+  // console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
+
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+  console.log(beefman.heroBasicAtk(evilDan));
+  console.log(evilDan.villainBasicAtk(beefman));
+  console.log(beefman.displayHealth());
+  console.log(evilDan.displayHealth());
+  console.log();
+
+
 
 
   // Stretch task: 
