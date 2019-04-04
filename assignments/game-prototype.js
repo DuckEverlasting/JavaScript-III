@@ -11,7 +11,7 @@
     "d100": function() {return Math.floor(Math.random() * 100 + 1)},
   }
   
-  // === Constructors ===
+  // === Classes ===
   
   // == GameObject ==
 class GameObject {
