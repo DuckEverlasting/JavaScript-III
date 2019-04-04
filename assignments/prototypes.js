@@ -25,7 +25,7 @@ function GameObject(data) {
 
 GameObject.prototype.destroy = function() {
   this.exists = false;
-  // return `${this.name} was removed from the game.`
+  return `${this.name} was removed from the game.`
 };
 
 
@@ -49,7 +49,7 @@ CharacterStats.prototype.takeDamage = function(dam) {
     this.healthPoints = 0;
     this.destroy()
   };
-  return `${this.name} took ${dam} damage.`
+  return `${this.name} took damage.`
 };
 CharacterStats.prototype.displayHealth = function() {
   return `${this.name} currently has ${this.healthPoints} hp remaining.`
@@ -144,9 +144,7 @@ const mage = new Hero({
   team: 'Mage Guild',
   weapons: [
     {"weaponName":"Staff of Shamalama",
-    "weaponDamage":30},
-    {"weaponName":"Dagger",
-    "weaponDamage":10},
+    "weaponDamage":30}
   ],
   strength: 14,
   accuracy: .6,
@@ -160,7 +158,7 @@ const swordsman = new Hero({
     width: 2,
     height: 2,
   },
-  healthPoints: 150,
+  healthPoints: 15,
   name: 'Sir Mustachio',
   team: 'The Round Table',
   weapons: [
@@ -259,17 +257,24 @@ const goblin = new Villain({
 });
 
   
-  // console.log(mage.createdAt); // Today's date
-  // console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
-  // console.log(swordsman.healthPoints); // 15
-  // console.log(mage.name); // Bruce
-  // console.log(swordsman.team); // The Round Table
-  // console.log(mage.weapons); // Staff of Shamalama
-  // console.log(archer.language); // Elvish
-  // console.log(archer.greet()); // Lilith offers a greeting in Elvish.
-  // console.log(mage.takeDamage()); // Bruce took damage.
-  // console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
+  console.log(mage.createdAt); // Today's date
+  console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
+  console.log(swordsman.healthPoints); // 15
+  console.log(mage.name); // Bruce
+  console.log(swordsman.team); // The Round Table
+  console.log(mage.weapons[0].weaponName); // Staff of Shamalama
+  console.log(archer.language); // Elvish
+  console.log(archer.greet()); // Lilith offers a greeting in Elvish.
+  console.log(mage.takeDamage()); // Bruce took damage.
+  console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
 
+
+   // Stretch task: 
+  // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
+  // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
+  // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+  
 const doBattle = function (fighter1, fighter2) {
   do {
     console.log(fighter1.preferredAtk(fighter2));
@@ -292,13 +297,4 @@ const doBattle = function (fighter1, fighter2) {
   };
 };
 
-doBattle(archer, goblin);
-  
-
-
-
-
-  // Stretch task: 
-  // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
-  // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
-  // * Create two new objects, one a villain and one a hero and fight it out with methods!
+doBattle(beefman, evilDan);
