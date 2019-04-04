@@ -25,7 +25,7 @@ function GameObject(data) {
 
 GameObject.prototype.destroy = function() {
   this.exists = false;
-  return `${this.name} was removed from the game.`
+  // return `${this.name} was removed from the game.`
 };
 
 
@@ -47,10 +47,9 @@ CharacterStats.prototype.takeDamage = function(dam) {
   this.healthPoints -= dam;
   if (this.healthPoints <= 0) {
     this.healthPoints = 0;
-    return `${this.name} took ${dam} damage.\n${this.destroy()}`
-  } else {
-    return `${this.name} took ${dam} damage.`
+    this.destroy()
   };
+  return `${this.name} took ${dam} damage.`
 };
 CharacterStats.prototype.displayHealth = function() {
   return `${this.name} currently has ${this.healthPoints} hp remaining.`
@@ -90,6 +89,7 @@ Humanoid.prototype.greet = function() {
 
 function Hero(data) {
   Humanoid.call(this, data);
+  this.preferredAtk = data.preferredAtk ? data.preferredAtk : this.heroBasicAtk;
 
 };
 
@@ -97,7 +97,7 @@ Hero.prototype = Object.create(Humanoid.prototype);
 Hero.prototype.heroBasicAtk = function(target) {
   if (target.exists){
     if (this.exists) {
-      let dam = (this.strength / 10) * this.weapons[0].weaponDamage;
+      let dam = Math.ceil((this.strength / 10) * this.weapons[0].weaponDamage);
       let hit = this.accuracy >= Math.random();
       return (hit) ? `${this.name} attacks ${target.name} valiantly with ${this.weapons[0].weaponName}! ${target.takeDamage(dam)}` : `${this.name} attacks ${target.name} valiantly with ${this.weapons[0].weaponName}! And misses!`;
     } else {
@@ -110,14 +110,14 @@ Hero.prototype.heroBasicAtk = function(target) {
 
 function Villain(data) {
   Humanoid.call(this, data);
-
+  this.preferredAtk = data.preferredAtk ? data.preferredAtk : this.villainBasicAtk;
 };
 
 Villain.prototype = Object.create(Humanoid.prototype);
 Villain.prototype.villainBasicAtk = function(target) {
   if (target.exists){
     if (this.exists) {
-      let dam = (this.strength / 10) * this.weapons[0].weaponDamage;
+      let dam = Math.ceil((this.strength / 10) * this.weapons[0].weaponDamage);
       let hit = this.accuracy >= Math.random();
       return (hit) ? `${this.name} attacks ${target.name} maliciously with ${this.weapons[0].weaponName}! ${target.takeDamage(dam)}` : `${this.name} attacks ${target.name} maliciously with ${this.weapons[0].weaponName}! And misses!`;
     } else {
@@ -132,53 +132,66 @@ Villain.prototype.villainBasicAtk = function(target) {
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
 
-const mage = new Humanoid({
+const mage = new Hero({
   createdAt: new Date(),
   dimensions: {
     length: 2,
     width: 1,
     height: 1,
   },
-  healthPoints: 5,
+  healthPoints: 50,
   name: 'Bruce',
   team: 'Mage Guild',
   weapons: [
-    'Staff of Shamalama',
+    {"weaponName":"Staff of Shamalama",
+    "weaponDamage":30},
+    {"weaponName":"Dagger",
+    "weaponDamage":10},
   ],
+  strength: 14,
+  accuracy: .6,
   language: 'Common Tongue',
 });
 
-const swordsman = new Humanoid({
+const swordsman = new Hero({
   createdAt: new Date(),
   dimensions: {
     length: 2,
     width: 2,
     height: 2,
   },
-  healthPoints: 15,
+  healthPoints: 150,
   name: 'Sir Mustachio',
   team: 'The Round Table',
   weapons: [
-    'Giant Sword',
-    'Shield',
+    {"weaponName":"Giant Sword",
+    "weaponDamage":25},
+    {"weaponName":"Shield",
+    "weaponDamage":5}
   ],
+  strength: 17,
+  accuracy: .72,
   language: 'Common Tongue',
 });
 
-const archer = new Humanoid({
+const archer = new Hero({
   createdAt: new Date(),
   dimensions: {
     length: 1,
     width: 2,
     height: 4,
   },
-  healthPoints: 10,
+  healthPoints: 100,
   name: 'Lilith',
   team: 'Forest Kingdom',
   weapons: [
-    'Bow',
-    'Dagger',
+    {"weaponName":"Bow",
+    "weaponDamage":15},
+    {"weaponName":"Dagger",
+    "weaponDamage":10}
   ],
+  strength: 14,
+  accuracy: .85,
   language: 'Elvish',
 });
 
@@ -189,14 +202,14 @@ const beefman = new Hero({
     width: 2,
     height: 4,
   },
-  healthPoints: 20,
+  healthPoints: 200,
   name: 'Beefman',
   team: 'Good Guys',
   weapons: [
     {"weaponName":"Sword",
-    "weaponDamage":2},
+    "weaponDamage":20},
     {"weaponName":"Dagger",
-    "weaponDamage":1}
+    "weaponDamage":10}
   ],
   strength: 18,
   accuracy: .75,
@@ -210,17 +223,38 @@ const evilDan = new Villain({
     width: 2,
     height: 4,
   },
-  healthPoints: 20,
+  healthPoints: 200,
   name: 'Evil Dan',
   team: 'Bad Guys',
   weapons: [
-    {"weaponName":"Knife",
-    "weaponDamage":1},
-    {"weaponName":"Other Knife",
-    "weaponDamage":1}
+    {"weaponName":"Vile Magicks",
+    "weaponDamage":30},
+    {"weaponName":"Twisted Knife",
+    "weaponDamage":10}
   ],
   strength: 16,
   accuracy: .70,
+  language: 'Common',
+});
+
+const goblin = new Villain({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 2,
+  },
+  healthPoints: 50,
+  name: 'Goblin',
+  team: 'Bad Guys',
+  weapons: [
+    {"weaponName":"Slingshot",
+    "weaponDamage":10},
+    {"weaponName":"Small Knife",
+    "weaponDamage":5}
+  ],
+  strength: 12,
+  accuracy: .60,
   language: 'Common',
 });
 
@@ -236,56 +270,30 @@ const evilDan = new Villain({
   // console.log(mage.takeDamage()); // Bruce took damage.
   // console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
 
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
-  console.log(beefman.heroBasicAtk(evilDan));
-  console.log(evilDan.villainBasicAtk(beefman));
-  console.log(beefman.displayHealth());
-  console.log(evilDan.displayHealth());
-  console.log();
+const doBattle = function (fighter1, fighter2) {
+  do {
+    console.log(fighter1.preferredAtk(fighter2));
+    console.log(fighter2.preferredAtk(fighter1));
+    console.log(fighter1.displayHealth());
+    console.log(fighter2.displayHealth());
+    console.log();
+  } while (
+    fighter1.exists && fighter2.exists
+  );
+  
+  if (fighter1.exists && !fighter2.exists) {
+    console.log(`${fighter2.name} has been slain!\n${fighter1.name} is victorious!`)
+  } else if (!fighter1.exists && fighter2.exists) {
+    console.log(`${fighter1.name} has been slain!\n${fighter2.name} is victorious!`)
+  } else if (!fighter1.exists && !fighter2.exists) {
+    console.log(`${fighter1.name} and ${fighter2.name} have slain each other, somehow!`)
+  } else {
+    console.log(`ERROR`)
+  };
+};
+
+doBattle(archer, goblin);
+  
 
 
 
